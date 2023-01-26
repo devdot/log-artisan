@@ -182,15 +182,19 @@ class ShowLog extends Command
             $this->printSeparator();
             $this->line(date('Y-m-d H:i:s', $log['timestamp']).' <fg=gray>'.$log['env'].'</>.'.Log::styleDebugLevel($log['level']).':');
             
-            if($this->option('short') && strlen($log['message']) > $shortLen) {
+            if($this->option('short')) {
                 // cut off after a certain threshold (2 lines max), make sure it never more than 2 lines
                 $short = substr($log['message'], 0, $shortLen);
                 $ex = explode(PHP_EOL, $short, 3);
-                if(strlen($ex[0]) <= $this->terminalWidth)
+                if(strlen($ex[0]) <= $this->terminalWidth && count($ex) > 1)
                     $short = $ex[0].PHP_EOL.$ex[1];
                 else
                     $short = $ex[0];
-                $this->line($short.'  [...]');
+
+                // make sure we don't add [...] if we didn't cut
+                if(strlen($short) < strlen($log['message']))
+                    $short .= '  [...]';
+                $this->line($short);
             }
             else {
                 $this->line($log['message']);
