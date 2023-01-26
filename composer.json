@@ -1,0 +1,36 @@
+{
+    "name": "devdot/log-artisan",
+    "description": "View and manage log files using the artisan CLI",
+    "keywords": [
+        "log artisan",
+        "log management",
+        "log view",
+        "devdot",
+        "laravel"
+    ],
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Devdot\\LogArtisan\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Thomas Kuschan",
+            "email": "mail@thomaskuschan.de"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "illuminate/contracts": "^9",
+        "illuminate/console": "^9"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Devdot\\LogArtisan\\ServiceProvider"
+            ]
+        }
+    }
+}
