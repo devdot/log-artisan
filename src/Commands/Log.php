@@ -77,6 +77,17 @@ class Log extends Command
 
         // get data from channels
         foreach($channels as $channel => $config) {
+            // make sure each channel has driver and level
+
+            // custom sort the config: first driver, level, path, rest alphabetical
+            $arr = [
+                'driver' => $config['driver'] ?? null,
+                'level' => $config['level'] ?? null,
+            ];
+            if(isset($config['path'])) $arr['path'] = $config['path'];
+            ksort($config);
+            $config = array_merge($arr, $config);
+
             $display = [];
             // now sift through the config
             foreach($config as $key => $value) {
@@ -104,7 +115,7 @@ class Log extends Command
                         break;
                     case 'level':
                         // style the level
-                        $value = $this->styleDebugLevel($value);
+                        $value = $value ? $this->styleDebugLevel($value) : self::STR_NULL;
                         break;
                 }
 
