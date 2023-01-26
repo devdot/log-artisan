@@ -3,7 +3,6 @@
 namespace Devdot\LogArtisan\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
 
 class Log extends Command
 {
@@ -41,6 +40,13 @@ class Log extends Command
        
         // now parse the main channels for their used channels
         $channels = [];
+
+        // add the emergency channel
+        $channels['emergency (internal)'] = array_merge(
+            config('logging.channels.emergency'),
+            ['level' => 'emergency'],
+        );
+
         foreach($mainChannels as $key => $channel) {
             if($channel == null) {
                 // overwrite with null string
@@ -48,13 +54,13 @@ class Log extends Command
                 continue;
             }
 
-            $channels[$channel] = [];
+            $channels[$channel] = config('logging.channels.'.$channel);
 
             // check if this channel has sub-channels
             if(count(config('logging.channels.'.$channel.'.channels', []))) {
                 $subchannels = config('logging.channels.'.$channel.'.channels');
                 foreach($subchannels as $sub) {
-                    $channels[$sub] = [];
+                    $channels[$sub] = config('logging.channels.'.$sub);
                 }
 
                 // update the channel string for this main channel
@@ -64,14 +70,13 @@ class Log extends Command
 
         $config = [
             'Configuration Cache' => $this->laravel->configurationIsCached() ? '<fg=green;options=bold>CACHED</>' : '<fg=yellow;options=bold>NOT CACHED</>',
-            'Global Log Level' => env('LOG_LEVEL', self::STR_NULL),
+            'Global Log Level' => env('LOG_LEVEL') ? $this->styleDebugLevel(env('LOG_LEVEL')) : self::STR_NULL,
         ];
 
         $this->display('Logging Configuration', array_merge($config, $mainChannels));
 
         // get data from channels
-        foreach($channels as $channel => $arr) {
-            $config = config('logging.channels.'.$channel);
+        foreach($channels as $channel => $config) {
             $display = [];
             // now sift through the config
             foreach($config as $key => $value) {
@@ -97,6 +102,10 @@ class Log extends Command
                             $value = '<fg=gray><file missing></> <fg=red>'.$value.'</>';
                         }
                         break;
+                    case 'level':
+                        // style the level
+                        $value = $this->styleDebugLevel($value);
+                        break;
                 }
 
                 if(is_bool($value)) {
@@ -120,5 +129,36 @@ class Log extends Command
         foreach($data as $key => $value) {
             $this->components->twoColumnDetail($key, $value);
         }
+    }
+
+    protected function styleDebugLevel($level) {
+        switch($level) {
+            // sorted in descending order of severity
+            case 'emergency':
+                $color = 'magenta';
+                break;
+            case 'alert':
+            case 'critical':
+                $color = 'bright-red';
+                break;
+            case 'error':
+                $color = 'red';
+                break;
+            case 'warning':
+            case 'notice':
+                $color = 'yellow';
+                break;
+            case 'info':
+                $color = 'blue';
+                break;
+            case 'debug':
+                $color = 'gray';
+                break;
+            default:
+                $color = 'white';
+                break;
+        }
+        $value = '<fg='.$color.'>'.strtoupper($level).'</>';
+        return $value;
     }
 }
