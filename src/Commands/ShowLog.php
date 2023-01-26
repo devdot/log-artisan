@@ -29,6 +29,7 @@ class ShowLog extends Command
         {--c|count= : Show this amount of entries, default is '.self::DEFAULT_COUNT.'}
         {--l|level= : Show only entries with this log level}
         {--channel= : Use this specified logging channel}
+        {--s|short : Only show short snippets}
     ';
 
     /**
@@ -176,10 +177,24 @@ class ShowLog extends Command
         // get the last $count items
         $logs = array_slice($logs, -$count);
 
+        $shortLen = ($this->terminalWidth*2)-7;;
         foreach($logs as $log) {
             $this->printSeparator();
             $this->line(date('Y-m-d H:i:s', $log['timestamp']).' <fg=gray>'.$log['env'].'</>.'.Log::styleDebugLevel($log['level']).':');
-            $this->line($log['message']);
+            
+            if($this->option('short') && strlen($log['message']) > $shortLen) {
+                // cut off after a certain threshold (2 lines max), make sure it never more than 2 lines
+                $short = substr($log['message'], 0, $shortLen);
+                $ex = explode(PHP_EOL, $short, 3);
+                if(strlen($ex[0]) <= $this->terminalWidth)
+                    $short = $ex[0].PHP_EOL.$ex[1];
+                else
+                    $short = $ex[0];
+                $this->line($short.'  [...]');
+            }
+            else {
+                $this->line($log['message']);
+            }
 
             $this->line('<fg=gray>@ '.$log['file'].'</>');
         }
@@ -191,7 +206,7 @@ class ShowLog extends Command
 
     protected function printSeparator() {
         $this->newLine();
-        $this->line('<bg=white>'.str_pad('', $this->terminalWidth, ' ').'</>');
+        $this->line('<bg=gray>'.str_pad('', $this->terminalWidth, ' ').'</>');
         $this->newLine();
     }
 
