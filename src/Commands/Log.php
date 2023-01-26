@@ -3,6 +3,7 @@
 namespace Devdot\LogArtisan\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Storage;
 
 class Log extends Command
 {
@@ -86,6 +87,15 @@ class Log extends Command
                     case 'handler_with':
                     case 'url':
                         $value = self::STR_SECRET;
+                        break;
+                    case 'path':
+                        // now check if this file exists and when it was modified
+                        if(file_exists($value)) {
+                            $value = '<fg=gray><'.date('Y-m-d H:i:s', filemtime($value)).'></> '.$value;
+                        }
+                        else {
+                            $value = '<fg=gray><file missing></> <fg=red>'.$value.'</>';
+                        }
                         break;
                 }
 
