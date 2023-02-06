@@ -123,29 +123,9 @@ class ShowLog extends Command
             return Command::SUCCESS;
         }
 
-        $shortLen = ($this->terminalWidth*2)-7;
-        $logs = $records;
-        foreach($logs as $log) {
+        foreach($records as $log) {
             $this->printSeparator();
-            $this->line($log['datetime']->format('Y-m-d H:i:s').' <fg=gray>'.$log['channel'].'</>.'.\Devdot\LogArtisan\Commands\Log::styleDebugLevel($log['level']).':');
-            
-            if($this->option('short')) {
-                // cut off after a certain threshold (2 lines max), make sure it never more than 2 lines
-                $short = substr($log['message'], 0, $shortLen);
-                $ex = explode(PHP_EOL, $short, 3);
-                if(strlen($ex[0]) <= $this->terminalWidth && count($ex) > 1)
-                    $short = $ex[0].PHP_EOL.$ex[1];
-                else
-                    $short = $ex[0];
-
-                // make sure we don't add [...] if we didn't cut
-                if(strlen($short) < strlen($log['message']))
-                    $short .= '  [...]';
-                $this->line($short);
-            }
-            else {
-                $this->line($log['message']);
-            }
+            $this->printRecord($log);
         }
 
         $this->printSeparator();
@@ -163,5 +143,14 @@ class ShowLog extends Command
         $this->newLine();
         $this->line('<bg=gray>'.str_pad('', $this->terminalWidth, ' ').'</>');
         $this->newLine();
+    }
+
+    protected function printRecord($record) {
+        $this->line(
+            $record['datetime']->format('Y-m-d H:i:s').
+            ' <fg=gray>'.$record['channel'].'</>.'.
+            \Devdot\LogArtisan\Commands\Log::styleDebugLevel($record['level']).':'
+        );
+        $this->line($record['message']);
     }
 }
