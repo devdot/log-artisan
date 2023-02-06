@@ -2,6 +2,7 @@
 
 namespace Devdot\LogArtisan\Commands;
 
+use Devdot\LogArtisan\Models\Log;
 use Illuminate\Console\Command;
 
 class ShowLog extends Command
@@ -97,69 +98,15 @@ class ShowLog extends Command
             $this->error('No logfiles exist in filesystem!');
             return Command::FAILURE;
         }
-        // lets grab filesize for stats
-        $filesSize = array_map(fn($file) => (filesize($file)), $files);
 
-        // show the files
-        $this->line('Reading from these existing files:');
-        $this->components->bulletList($files);
-        $this->newLine();
+        // create file objects from the file names
+        $files = array_map(fn($filename) => new Log($filename), $files);
 
-        // now finally process the files into log entries
+        // run through the files and get their logs
         $logs = [];
-        $bytesTotal = array_sum($filesSize);
-
-        // go through each file, track progress with bytes
-        $progress = $this->output->createProgressBar($bytesTotal);
         foreach($files as $file) {
-            $progress->setMessage('File: '.$file);
-
-            // read from the file
-            $fs = fopen($file, 'r');
-            $lastLine = '';
-            $currentLogLines = [];
-            while(!feof($fs)) {
-                // apend the bit from the last line from last read (as that may not have been complete)
-                $str = $lastLine.fread($fs, self::READ_BUFFER_SIZE);
-                $progress->advance(self::READ_BUFFER_SIZE);
-
-                // break down the string into lines
-                $lines = explode("\n", $str);
-
-                // take off the last line
-                $lastLine = array_pop($lines);
-
-                // process the lines
-                foreach($lines as $line) {
-                    // check if this line marks a new log line
-                    $preg = [];
-                    if(substr($line, 0, 1) === '[' && preg_match('/(^\[[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\] )/', $line, $preg)) {
-                        // we found a new log, just analyse the time
-                        $timestamp = strtotime(substr($preg[0], 1, -2));
-
-                        // now lets check if we have to parse the last one
-                        if(count($currentLogLines) > 0) {
-                            // send this to parsing
-                            $log = $this->parseLogLines($currentLogLines, $timestamp);
-
-                            // check if this is the level we're looking for
-                            if($level == null || $log['level'] == $level) {
-                                // save log in list
-                                $log['file'] = $file;
-                                $logs[] = $log;
-                            }
-                        }
-                        // start collecting new lines
-                        $currentLogLines = [$line];
-                    }
-                    else {
-                        $currentLogLines[] = $line;
-                    }
-                }
-            }
+            $logs = array_merge($logs, $file->getRecords());
         }
-        $progress->finish();
-        $this->newLine();
 
         if(count($logs) === 0) {
             $this->warn('No log entries found!');
@@ -167,11 +114,11 @@ class ShowLog extends Command
         }
 
         // now sort the logs by date
-        usort($logs, fn($a, $b) => ($a['timestamp'] > $b['timestamp']));
+        usort($logs, fn($a, $b) => ($a['datetime']->format('U') > $b['datetime']->format('U')));
 
         // send info
         $this->newLine();
-        $this->line(count($logs).' log entries from '.date('Y-m-d H:i:s', $logs[0]['timestamp']).' until '.date('Y-m-d H:i:s', $logs[count($logs)-1]['timestamp']));
+        $this->line(count($logs).' log entries from '.$logs[0]['datetime']->format('Y-m-d H:i:s')).' until '.$logs[count($logs)-1]['datetime']->format('Y-m-d H:i:s');
         $this->newLine();
 
         // get the last $count items
@@ -180,7 +127,7 @@ class ShowLog extends Command
         $shortLen = ($this->terminalWidth*2)-7;;
         foreach($logs as $log) {
             $this->printSeparator();
-            $this->line(date('Y-m-d H:i:s', $log['timestamp']).' <fg=gray>'.$log['env'].'</>.'.Log::styleDebugLevel($log['level']).':');
+            $this->line($log['datetime']->format('Y-m-d H:i:s').' <fg=gray>'.$log['channel'].'</>.'.\Devdot\LogArtisan\Commands\Log::styleDebugLevel($log['level']).':');
             
             if($this->option('short')) {
                 // cut off after a certain threshold (2 lines max), make sure it never more than 2 lines
@@ -199,8 +146,6 @@ class ShowLog extends Command
             else {
                 $this->line($log['message']);
             }
-
-            $this->line('<fg=gray>@ '.$log['file'].'</>');
         }
 
         $this->newLine();

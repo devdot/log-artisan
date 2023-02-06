@@ -143,7 +143,7 @@ class Log extends Command
     }
 
     public static function styleDebugLevel($level) {
-        switch($level) {
+        switch(strtolower($level)) {
             // sorted in descending order of severity
             case 'emergency':
                 $color = 'magenta';
