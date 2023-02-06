@@ -31,6 +31,7 @@ class ShowLog extends Command
         {--l|level= : Show only entries with this log level}
         {--channel= : Use this specified logging channel}
         {--s|short : Only show short snippets}
+        {--stacktrace : Show the full stacktrace}
     ';
 
     /**
@@ -165,7 +166,7 @@ class ShowLog extends Command
                 continue;
             $this->line('<fg=gray>'.$attribute.':</> '.var_export($value, true));
         }
-        if(isset($array['exception'])) {
+        if(isset($array['exception']) && !$this->option('short')) {
             $errorMessage = $array['exception'];
             $stacktrace = '';
             if(strpos($array['exception'], PHP_EOL.'[stacktrace]'.PHP_EOL) !== false) {
@@ -179,9 +180,18 @@ class ShowLog extends Command
             $this->line('<fg=gray>[stacktrace]</>');
             // split up the stacktrace
             $lines = explode(PHP_EOL, $stacktrace);
-            foreach($lines as $line) {
-                $this->line('<fg=gray>'.$line.'</>');
+            // if we don't have the stacktrace option set, skip most of the stacktrace
+            if(!$this->option('stacktrace') && count($lines) > 2) {
+                $this->line('<fg=gray>'.$lines[0].'</>');
+                $this->line('<fg=gray>'.$lines[1].'</>');
+                $this->line('<fg=gray>[...]</>');
             }
+            else {
+                foreach($lines as $line) {
+                    $this->line('<fg=gray>'.$line.'</>');
+                }
+            }
+
         }   
     }
 }
