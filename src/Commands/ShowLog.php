@@ -2,7 +2,7 @@
 
 namespace Devdot\LogArtisan\Commands;
 
-use Devdot\LogArtisan\Models\Log;
+use Devdot\LogArtisan\Models\DriverMultiple;
 use Illuminate\Console\Command;
 
 class ShowLog extends Command
@@ -82,47 +82,47 @@ class ShowLog extends Command
         // info line at top
         $this->line('Showing <fg=gray>'.$count.'</> entries from log channel <fg=gray>'.$channel.'</>'.($level ? ' at level <fg=gray>'.$level.'</fg=gray>' : ''));
 
-        // get logs for the selected channel
-        $files = $this->getFilesFromChannel($channel);
+        // create a multi driver for the default channel
+        $channels = [
+            config('logging.default'),
+            config('logging.deprecations.channel'),
+        ];
+        $multidriver = new DriverMultiple('', $channels);
+        // check if emergency log is already in there
+        if(!in_array(config('logging.channels.emergency.path'), $multidriver->getFilenames())) {
+            // create new multidriver with emergency log added into the mix
+            $channels[] = 'emergency';
+            $multidriver = new DriverMultiple('', $channels);
+        }
 
         // check if we have files at all
-        if(count($files) === 0) {
+        if(count($multidriver->getFilenames()) === 0) {
             $this->warn('Found no configured logfiles besides emergency log!');
         }
-        // merge emergency log always
-        $files[] = config('logging.channels.emergency.path');
+
+        // check if emergency log is already in there
+        if(!in_array(config('logging.channels.emergency.path'), $multidriver->getFilenames())) {
+            // create new multidriver with emergency log added into the mix
+            $channels[] = 'emergency';
+            $multidriver = new DriverMultiple('', $channels);
+        }
         
         // filter these files for those that exist
-        $files = array_filter($files, fn($file) => file_exists($file));
-        if(count($files) === 0) {
+        if(count($multidriver->getFilenames()) === 0) {
             $this->error('No logfiles exist in filesystem!');
             return Command::FAILURE;
         }
 
-        // create file objects from the file names
-        $files = array_map(fn($filename) => new Log($filename), $files);
+        // get the records, this will accumulate and sort recursively
+        $records = $multidriver->getRecords();
 
-        // run through the files and get their logs
-        $logs = [];
-        foreach($files as $file) {
-            $logs = array_merge($logs, $file->getRecords());
-        }
-
-        if(count($logs) === 0) {
+        if(count($records) === 0) {
             $this->warn('No log entries found!');
             return Command::SUCCESS;
         }
 
-        // now sort the logs by date
-        usort($logs, fn($a, $b) => ($a['datetime']->format('U') > $b['datetime']->format('U')));
-
-        // send info
-        $this->newLine();
-        $this->line(count($logs).' log entries from '.$logs[0]['datetime']->format('Y-m-d H:i:s')).' until '.$logs[count($logs)-1]['datetime']->format('Y-m-d H:i:s');
-        $this->newLine();
-
         // get the last $count items
-        $logs = array_slice($logs, -$count);
+        $logs = array_slice($records, -$count);
 
         $shortLen = ($this->terminalWidth*2)-7;;
         foreach($logs as $log) {
@@ -148,7 +148,13 @@ class ShowLog extends Command
             }
         }
 
+        $this->printSeparator();
+
+        // send info
         $this->newLine();
+        $this->line('Processed '.count($records).' log entries from '.$records[0]['datetime']->format('Y-m-d H:i:s').' until '.$records[count($records)-1]['datetime']->format('Y-m-d H:i:s').', showed '.count($logs));
+        $this->newLine();
+
 
         return Command::SUCCESS;
     }
@@ -157,37 +163,5 @@ class ShowLog extends Command
         $this->newLine();
         $this->line('<bg=gray>'.str_pad('', $this->terminalWidth, ' ').'</>');
         $this->newLine();
-    }
-
-    protected function getFilesFromChannel($channel) {
-        $files = [];
-        // load the files from this channel
-        $config = config('logging.channels.'.$channel);
-
-        // special case with emergency channel
-        if($channel == 'emergency')
-            $config['driver'] = 'single';
-        
-        // first switch depending on the driver
-        switch($config['driver']) {
-            case 'single':
-                // simply grab the file that is defined here
-                $files[] = $config['path'];
-                break;
-            case 'stack':
-                // load files recursively
-                foreach($config['channels'] as $subchannel) {
-                    // simply merge recursively
-                    $files = array_merge($files, $this->getFilesFromChannel($subchannel));
-                }
-                break;
-            case 'daily':
-                // fetch the daily files ...
-                break;
-            default:
-                break;
-        }
-        // return all the files
-        return $files;
     }
 }
