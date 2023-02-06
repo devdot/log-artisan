@@ -149,8 +149,39 @@ class ShowLog extends Command
         $this->line(
             $record['datetime']->format('Y-m-d H:i:s').
             ' <fg=gray>'.$record['channel'].'</>.'.
-            \Devdot\LogArtisan\Commands\Log::styleDebugLevel($record['level']).':'
+            \Devdot\LogArtisan\Commands\Log::styleDebugLevel($record['level']).
+            ' <fg=gray>@'.$record->getDriver()->getLaravelChannel().'</>:'
         );
         $this->line($record['message']);
+        // stop output here if it's short output
+        if($this->option('short')) {
+            return;
+        }
+        // parse the context object
+        $array = is_array($record['context']) ? $record['context'] : get_object_vars($record['context']);
+        foreach($array as $attribute => $value) {
+            // handle exception after the loop
+            if($attribute == 'exception')
+                continue;
+            $this->line('<fg=gray>'.$attribute.':</> '.var_export($value, true));
+        }
+        if(isset($array['exception'])) {
+            $errorMessage = $array['exception'];
+            $stacktrace = '';
+            if(strpos($array['exception'], PHP_EOL.'[stacktrace]'.PHP_EOL) !== false) {
+                // split at the stacktrace
+                $ex = explode(PHP_EOL.'[stacktrace]'.PHP_EOL, $array['exception'], 2);
+                $errorMessage = $ex[0];
+                $stacktrace = $ex[1];
+            }
+            $this->line('<fg=gray>exception</>: '.$errorMessage);
+            $this->newLine();
+            $this->line('<fg=gray>[stacktrace]</>');
+            // split up the stacktrace
+            $lines = explode(PHP_EOL, $stacktrace);
+            foreach($lines as $line) {
+                $this->line('<fg=gray>'.$line.'</>');
+            }
+        }   
     }
 }
