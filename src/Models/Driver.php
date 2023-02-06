@@ -34,10 +34,7 @@ class Driver {
         return $this->logs;
     }
 
-    public function getRecords(array $filter = [
-        'count' => null,
-        'level' => null,
-    ]): array {
+    public function getRecords(array $filter = []): array {
         // check if we have generated it before
         if(!isset($this->records) || empty($this->records)) {
             $this->accumulateRecords($filter);
@@ -64,7 +61,22 @@ class Driver {
         $this->records = [];
         foreach($this->logs as $log) {
             // get all the records from this logfile and merge them into the others
-            $this->records = array_merge($this->records, $log->getRecords());
+            // we iterate with double foreach so we can do a typecast
+            foreach($log->getRecords() as $record) {
+                // cast the record
+                $record = new LogRecord(
+                    $record['datetime'],
+                    $record['channel'],
+                    $record['level'],
+                    $record['message'],
+                    $record['context'],
+                    $record['extra'],
+                );
+                // add ourselves as driver
+                $record->setDriver($this);
+                // add to the list
+                $this->records[] = $record;
+            }
         }
         // finally sort the results
         $this->sortRecords();
