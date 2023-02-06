@@ -57,10 +57,10 @@ class DriverMultiple extends Driver {
         return $this->logs;
     }
 
-    protected function accumulateRecords() {
+    protected function accumulateRecords(array $filter = []) {
         $this->records = [];
         foreach($this->drivers as $driver) {
-            $this->records = array_merge($this->records, $driver->getRecords());
+            $this->records = array_merge($this->records, $driver->getRecords($filter));
         }
         // make sure to sort after merging
         $this->sortRecords();

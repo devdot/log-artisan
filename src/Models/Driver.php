@@ -34,15 +34,33 @@ class Driver {
         return $this->logs;
     }
 
-    public function getRecords(): array {
+    public function getRecords(array $filter = [
+        'count' => null,
+        'level' => null,
+    ]): array {
         // check if we have generated it before
         if(!isset($this->records) || empty($this->records)) {
-            $this->accumulateRecords();
+            $this->accumulateRecords($filter);
         }
-        return $this->records;
+        // now run the filtering
+        return $this->getFilteredRecords($filter);
     }
 
-    protected function accumulateRecords() {
+    public function getFilteredRecords(array $filter): array {
+        $records = $this->records;
+        if(isset($filter['level'])) {
+            // filter all that have this level
+            $level = strtolower($filter['level']);
+            $records = array_filter($records, fn($record) => strtolower($record['level']) == $level);
+        }
+        if(isset($filter['count']) && count($records) > $filter['count']) {
+            // only return the last $count
+            $records = array_slice($records, -$filter['count']);
+        }
+        return $records;
+    }
+
+    protected function accumulateRecords(array $filter = []) {
         $this->records = [];
         foreach($this->logs as $log) {
             // get all the records from this logfile and merge them into the others
