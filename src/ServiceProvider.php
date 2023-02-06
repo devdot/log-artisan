@@ -31,6 +31,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider {
             $this->commands([
                 Commands\Log::class,
                 Commands\ShowLog::class,
+                Commands\SearchLog::class,
             ]);
         }
     }

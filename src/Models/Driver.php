@@ -50,6 +50,9 @@ class Driver {
             $level = strtolower($filter['level']);
             $records = array_filter($records, fn($record) => strtolower($record['level']) == $level);
         }
+        if(isset($filter['search'])) {
+            $records = array_filter($records, fn($record) => (strpos($record['message'], $filter['search']) !== false));
+        }
         if(isset($filter['count']) && count($records) > $filter['count']) {
             // only return the last $count
             $records = array_slice($records, -$filter['count']);

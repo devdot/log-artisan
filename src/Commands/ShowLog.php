@@ -43,6 +43,11 @@ class ShowLog extends Command
 
     protected int $terminalWidth;
 
+    protected array $filter = [
+        'count' => null,
+        'level' => null,
+    ];
+
     /**
      * Execute the console command.
      *
@@ -53,20 +58,14 @@ class ShowLog extends Command
         // get the terminal width
         $this->terminalWidth = (new \Symfony\Component\Console\Terminal)->getWidth();
 
-        // prepare filter setting
-        $filter = [
-            'count' => null,
-            'level' => null,
-        ];
-
         // validate input data
         // count
-        $filter['count'] = empty($this->option('count')) ? self::DEFAULT_COUNT : (int) $this->option('count');
+        $this->filter['count'] = empty($this->option('count')) ? self::DEFAULT_COUNT : (int) $this->option('count');
         
         // level
         if(!empty($this->option('level'))) {
-            $filter['level'] = $this->option('level');
-            if(!in_array($filter['level'], self::LEVELS)) {
+            $this->filter['level'] = $this->option('level');
+            if(!in_array($this->filter['level'], self::LEVELS)) {
                 // this is an invalid log level
                 $this->error('Log Level is invalid, try: '.implode(', ', self::LEVELS));
                 return Command::INVALID;
@@ -95,7 +94,7 @@ class ShowLog extends Command
         $multidriver = new DriverMultiple('', $channels);
         
         // info line at top
-        $this->line('Showing <fg=gray>'.$filter['count'].'</> entries from log channel <fg=gray>'.implode(', ', $channels).'</>'.($filter['level'] ? ' at level <fg=gray>'.$filter['level'].'</fg=gray>' : ''));
+        $this->line('Showing <fg=gray>'.$this->filter['count'].'</> entries from log channel <fg=gray>'.implode(', ', $channels).'</>'.($this->filter['level'] ? ' at level <fg=gray>'.$this->filter['level'].'</fg=gray>' : ''));
 
         // check if we have files at all
         if(count($multidriver->getFilenames()) === 0) {
@@ -117,7 +116,7 @@ class ShowLog extends Command
         }
 
         // get the records, this will accumulate and sort recursively
-        $records = $multidriver->getRecords($filter);
+        $records = $multidriver->getRecords($this->filter);
 
         if(count($records) === 0) {
             $this->warn('No log entries found!');
