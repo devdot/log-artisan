@@ -190,33 +190,4 @@ class ShowLog extends Command
         // return all the files
         return $files;
     }
-
-    protected function parseLogLines(array $lines, int $timestamp) {
-        // EXAMPLE STRING: [2023-01-26 16:39:52] local.ERROR: Call to undefined function ... {"exception":"[object] 
-        
-            // start object with timestamp
-        $log = ['timestamp' => $timestamp];
-
-        // put it all into one string again
-        $str = implode(PHP_EOL, $lines);
-
-        // skip past the timestamp
-        $pos = strpos($str, ']') + 2;
-        // find column that separates header
-        $posColumn = strpos($str, ':', $pos);
-
-        // now get the header string
-        $header = substr($str, $pos, $posColumn - $pos);
-
-        // separate environment and level
-        $ex = explode('.', $header, 2);
-        $log['env'] = $ex[0];
-        $log['level'] = strtolower($ex[1]);
-
-        // add the message string
-        $log['message'] = substr($str, $posColumn + 2);
-
-        return $log;
-    }
-
 }
