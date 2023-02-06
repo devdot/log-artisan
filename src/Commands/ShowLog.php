@@ -49,6 +49,9 @@ class ShowLog extends Command
      */
     public function handle()
     {   
+        // get the terminal width
+        $this->terminalWidth = (new \Symfony\Component\Console\Terminal)->getWidth();
+
         // validate input data
         // count
         $count = empty($this->option('count')) ? self::DEFAULT_COUNT : (int) $this->option('count');
@@ -65,35 +68,28 @@ class ShowLog extends Command
             }
         }
 
-        // channel
-        $channel = config('logging.default');
+        // channel filtering
+        $channels = [];
         if(!empty($this->option('channel'))) {
-            $channel = $this->option('channel');
+            $channels[] = $this->option('channel');
             // check if this channel is configured
-            if(empty(config('logging.channels.'.$channel))) {
+            if(empty(config('logging.channels.'.$channels[0]))) {
                 $this->error('Channel is not configured!');
                 return Command::INVALID;
             }
         }
-
-        // get the terminal width
-        $this->terminalWidth = (new \Symfony\Component\Console\Terminal)->getWidth();
-
-        // info line at top
-        $this->line('Showing <fg=gray>'.$count.'</> entries from log channel <fg=gray>'.$channel.'</>'.($level ? ' at level <fg=gray>'.$level.'</fg=gray>' : ''));
+        else {
+            $channels = [
+                config('logging.default'),
+                config('logging.deprecations.channel'),
+            ];
+        }
 
         // create a multi driver for the default channel
-        $channels = [
-            config('logging.default'),
-            config('logging.deprecations.channel'),
-        ];
         $multidriver = new DriverMultiple('', $channels);
-        // check if emergency log is already in there
-        if(!in_array(config('logging.channels.emergency.path'), $multidriver->getFilenames())) {
-            // create new multidriver with emergency log added into the mix
-            $channels[] = 'emergency';
-            $multidriver = new DriverMultiple('', $channels);
-        }
+        
+        // info line at top
+        $this->line('Showing <fg=gray>'.$count.'</> entries from log channel <fg=gray>'.implode(', ', $channels).'</>'.($level ? ' at level <fg=gray>'.$level.'</fg=gray>' : ''));
 
         // check if we have files at all
         if(count($multidriver->getFilenames()) === 0) {
@@ -101,10 +97,11 @@ class ShowLog extends Command
         }
 
         // check if emergency log is already in there
-        if(!in_array(config('logging.channels.emergency.path'), $multidriver->getFilenames())) {
+        if(empty($this->option('channel')) && !in_array(config('logging.channels.emergency.path'), $multidriver->getFilenames())) {
             // create new multidriver with emergency log added into the mix
             $channels[] = 'emergency';
             $multidriver = new DriverMultiple('', $channels);
+            $this->line('Including emergency channel.');
         }
         
         // filter these files for those that exist
