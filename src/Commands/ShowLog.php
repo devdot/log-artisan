@@ -2,6 +2,7 @@
 
 namespace Devdot\LogArtisan\Commands;
 
+use Devdot\LogArtisan\Helpers\CommandHelper;
 use Devdot\LogArtisan\Models\DriverMultiple;
 use Illuminate\Console\Command;
 
@@ -149,7 +150,7 @@ class ShowLog extends Command
         $this->line(
             $record['datetime']->format('Y-m-d H:i:s').
             ' <fg=gray>'.$record['channel'].'</>.'.
-            \Devdot\LogArtisan\Commands\Log::styleDebugLevel($record['level']).
+            CommandHelper::styleDebugLevel($record['level']).
             ' <fg=gray>@'.$record->getDriver()->getLaravelChannel().'</>:'
         );
         $this->line($record['message']);

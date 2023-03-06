@@ -2,6 +2,7 @@
 
 namespace Devdot\LogArtisan\Commands;
 
+use Devdot\LogArtisan\Helpers\CommandHelper;
 use Illuminate\Console\Command;
 
 class Log extends Command
@@ -70,10 +71,10 @@ class Log extends Command
 
         $config = [
             'Configuration Cache' => $this->laravel->configurationIsCached() ? '<fg=green;options=bold>CACHED</>' : '<fg=yellow;options=bold>NOT CACHED</>',
-            'Global Log Level' => env('LOG_LEVEL') ? self::styleDebugLevel(env('LOG_LEVEL')) : self::STR_NULL,
+            'Global Log Level' => env('LOG_LEVEL') ? CommandHelper::styleDebugLevel(env('LOG_LEVEL')) : self::STR_NULL,
         ];
 
-        self::displaySection($this, 'Logging Configuration', array_merge($config, $mainChannels));
+        CommandHelper::displaySection($this, 'Logging Configuration', array_merge($config, $mainChannels));
 
         // get data from channels
         foreach($channels as $channel => $config) {
@@ -115,7 +116,7 @@ class Log extends Command
                         break;
                     case 'level':
                         // style the level
-                        $value = $value ? self::styleDebugLevel($value) : self::STR_NULL;
+                        $value = $value ? CommandHelper::styleDebugLevel($value) : self::STR_NULL;
                         break;
                 }
 
@@ -126,7 +127,7 @@ class Log extends Command
                 $display[$key] = $value ?? self::STR_NULL;
             }
 
-            self::displaySection($this, 'Channel: '.$channel, $display);
+            CommandHelper::displaySection($this, 'Channel: '.$channel, $display);
         }
         
         $this->newLine();
