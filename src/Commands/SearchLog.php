@@ -6,6 +6,8 @@ use Devdot\LogArtisan\Models\LogRecord;
 use Symfony\Component\Console\Input\InputArgument;
 
 class SearchLog extends ShowLog {
+    protected $description = 'Search through all log entries';
+
     public function __construct() {
         // basically, we use the parent class and add an arugment
         parent::__construct();
