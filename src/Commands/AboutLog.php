@@ -5,14 +5,14 @@ namespace Devdot\LogArtisan\Commands;
 use Devdot\LogArtisan\Helpers\CommandHelper;
 use Illuminate\Console\Command;
 
-class Log extends Command
+class AboutLog extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'log';
+    protected $signature = 'log:about';
 
     /**
      * The console command description.

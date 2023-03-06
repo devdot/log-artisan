@@ -29,7 +29,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider {
         // install all our commands
         if($this->app->runningInConsole()) {
             $this->commands([
-                Commands\Log::class,
+                Commands\AboutLog::class,
                 Commands\ShowLog::class,
                 Commands\SearchLog::class,
             ]);
