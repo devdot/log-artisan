@@ -211,29 +211,34 @@ class ShowLog extends Command
 
         // and shorten the entire string to fit one line
         if(strlen($plain) > $this->terminalWidth) {
-            // calculate the allowed length by adding the formatting length
-            $formattingLength = strlen($str) - strlen($plain);
+            // split the text open according to preg match
+            $m = [];
+            preg_match_all('/(<(?<tag>[^\/]*?)>(?<string>.*?)<\/>|.*?)/', $str, $m, PREG_SET_ORDER);
+            
+            // now go through this and make sure we stay short of the line length
+            $remaining = $this->terminalWidth;
+            $str = '';
+            foreach($m as $match) {
+                $sub = '';
+                // if we found a tag, handle that
+                if(isset($match['tag'])) {
+                    // create substring that is not longer than the remaining length
+                    $sub = substr($match['string'], 0, $remaining);
+                    // rebuild the tag
+                    $str .= '<'.$match['tag'].'>'.$sub.'</>';
+                }
+                else {
+                    // else simply take whatever string was found, but at most the remaining characters in length
+                    $sub = substr($match[0], 0, $remaining);
+                    $str .= $sub;
+                }
+                // update remaining depending on the substring we just added
+                $remaining -= strlen($sub);
 
-            // make it shorter
-            $str = substr($str, 0, $this->terminalWidth + $formattingLength);
-
-            // and make sure we are closing every formatting properly
-            if(substr($str, -2) === '</')
-                $str = substr($str, 0, -3).'</>';
-
-            // count to make sure we close every opened formatting tag
-            $countOpen = count(preg_split('/<[^\/]*?>/', $str));
-            $countClose = count(preg_split('/<\/>/', $str));
-
-            // check if we are odd between open and close
-            if($countOpen > $countClose) {
-                // make sure we didn't cut a closing tag short
-                if(substr($str, -1) == '<')
-                    $str = substr($str, 0, -3);
-
-                // append for each missing one the close tag
-                for($i = $countClose; $i < $countOpen; $i++)
-                    $str .= '</>';
+                if($remaining <= 0) {
+                    // should never go below 0 but we include it to be sure
+                    break;
+                }
             }
         }
 
