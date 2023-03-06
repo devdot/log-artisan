@@ -23,7 +23,16 @@ class SearchLog extends ShowLog {
     }
 
     protected function addHighlightingToRecord(LogRecord $record): LogRecord {
-        $message = str_replace($this->filter['search'], '<bg=yellow>'.$this->filter['search'].'</>', $record['message']);
+        $message = preg_replace(
+            [
+                '/('.$this->filter['search'].')/i', 
+                '/\\\\<bg=yellow>('.$this->filter['search'].')<\/>/i', // the sequence \<bg=yellow> causes errors, even when everything is escaped like \\<...> (maybe a Symfony bug?)
+            ],
+            [
+                '<bg=yellow>$1</>',
+                '<bg=yellow>\\\\$1</>', // solution to the issue above: include the backslash in the highlighting
+            ],
+            $record['message']);
         $driver = $record->getDriver();
         $record = new LogRecord(
             $record['datetime'],
