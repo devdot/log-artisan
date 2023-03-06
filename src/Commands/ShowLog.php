@@ -32,8 +32,8 @@ class ShowLog extends Command
         {--c|count= : Show this amount of entries, default is '.self::DEFAULT_COUNT.'}
         {--l|level= : Show only entries with this log level}
         {--channel= : Use this specified logging channel}
-        {--s|short : Only show short snippets}
-        {--singleline : Show single-lined layout}
+        {--short : Only show short snippets}
+        {--s|singleline : Show single-lined layout}
         {--stacktrace : Show the full stacktrace}
     ';
 
