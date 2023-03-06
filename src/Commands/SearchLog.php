@@ -22,8 +22,7 @@ class SearchLog extends ShowLog {
         parent::handle();
     }
 
-    protected function printRecord($record) {
-        // simply add highlighting and then let the parent handle it
+    protected function addHighlightingToRecord(LogRecord $record): LogRecord {
         $message = str_replace($this->filter['search'], '<bg=yellow>'.$this->filter['search'].'</>', $record['message']);
         $driver = $record->getDriver();
         $record = new LogRecord(
@@ -35,6 +34,19 @@ class SearchLog extends ShowLog {
             $record['extra'],
         );
         $record->setDriver($driver);
+        return $record;
+    }
+
+    protected function printRecord(LogRecord $record): void {
+        // simply add highlighting and then let the parent handle it
+        $record = $this->addHighlightingToRecord($record);
         parent::printRecord($record);
+    }
+
+    protected function printRecordSingleline(LogRecord $record): void {
+        // same as print Record
+        // simply add highlighting and then let the parent handle it
+        $record = $this->addHighlightingToRecord($record);
+        parent::printRecordSingleline($record);
     }
 }

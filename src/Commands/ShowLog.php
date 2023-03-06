@@ -4,6 +4,7 @@ namespace Devdot\LogArtisan\Commands;
 
 use Devdot\LogArtisan\Helpers\CommandHelper;
 use Devdot\LogArtisan\Models\DriverMultiple;
+use Devdot\LogArtisan\Models\LogRecord;
 use Illuminate\Console\Command;
 
 class ShowLog extends Command
@@ -32,6 +33,7 @@ class ShowLog extends Command
         {--l|level= : Show only entries with this log level}
         {--channel= : Use this specified logging channel}
         {--s|short : Only show short snippets}
+        {--singleline : Show single-lined layout}
         {--stacktrace : Show the full stacktrace}
     ';
 
@@ -125,8 +127,12 @@ class ShowLog extends Command
         }
 
         foreach($records as $log) {
-            $this->printSeparator();
-            $this->printRecord($log);
+            if($this->option('singleline'))
+                $this->printRecordSingleline($log);
+            else {
+                $this->printSeparator();
+                $this->printRecord($log);
+            }
         }
 
         $this->printSeparator();
@@ -146,13 +152,8 @@ class ShowLog extends Command
         $this->newLine();
     }
 
-    protected function printRecord($record) {
-        $this->line(
-            $record['datetime']->format('Y-m-d H:i:s').
-            ' <fg=gray>'.$record['channel'].'</>.'.
-            CommandHelper::styleDebugLevel($record['level']).
-            ' <fg=gray>@'.$record->getDriver()->getLaravelChannel().'</>:'
-        );
+    protected function printRecord(LogRecord $record): void {
+        $this->line(CommandHelper::styleLogRecordHeader($record));
         $this->line($record['message']);
         // stop output here if it's short output
         if($this->option('short')) {
@@ -193,5 +194,50 @@ class ShowLog extends Command
             }
 
         }   
+    }
+
+    protected function printRecordSingleline(LogRecord $record): void {
+        // create the heading text
+        $str = CommandHelper::styleLogRecordHeader($record);
+        
+        // now add the message
+        $str .= ' '.$record['message'];
+
+        // remove line wraps
+        $str = str_replace(PHP_EOL, ' ', $str);
+
+        // and create a string without the formatting
+        $plain = preg_replace('/<[^\/]*?>(.*?)<\/>/', '$1', $str);
+
+        // and shorten the entire string to fit one line
+        if(strlen($plain) > $this->terminalWidth) {
+            // calculate the allowed length by adding the formatting length
+            $formattingLength = strlen($str) - strlen($plain);
+
+            // make it shorter
+            $str = substr($str, 0, $this->terminalWidth + $formattingLength);
+
+            // and make sure we are closing every formatting properly
+            if(substr($str, -2) === '</')
+                $str = substr($str, 0, -3).'</>';
+
+            // count to make sure we close every opened formatting tag
+            $countOpen = count(preg_split('/<[^\/]*?>/', $str));
+            $countClose = count(preg_split('/<\/>/', $str));
+
+            // check if we are odd between open and close
+            if($countOpen > $countClose) {
+                // make sure we didn't cut a closing tag short
+                if(substr($str, -1) == '<')
+                    $str = substr($str, 0, -3);
+
+                // append for each missing one the close tag
+                for($i = $countClose; $i < $countOpen; $i++)
+                    $str .= '</>';
+            }
+        }
+
+        // print the string
+        $this->line($str);
     }
 }
