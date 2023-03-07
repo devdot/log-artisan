@@ -13,6 +13,7 @@ class Log {
         // initialize the parser
         $this->parser = new Parser();
         $this->parser->setPattern(Parser::PATTERN_LARAVEL);
+        $this->parser->setOptions(Parser::OPTION_JSON_FAIL_SOFT);
 
         if(!empty($filename)) {
             $this->setFile($filename);

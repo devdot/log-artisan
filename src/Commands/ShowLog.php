@@ -160,7 +160,10 @@ class ShowLog extends Command
             return;
         }
         // parse the context object
-        $array = is_array($record['context']) ? $record['context'] : get_object_vars($record['context']);
+        // handle the case where context is a string
+        $array = is_array($record['context']) 
+            ? $record['context'] 
+            : (is_object($record['context']) ? get_object_vars($record['context']) : ['context' => $record['context']]);
         foreach($array as $attribute => $value) {
             // handle exception after the loop
             if($attribute == 'exception')
