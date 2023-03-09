@@ -30,6 +30,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider {
         if($this->app->runningInConsole()) {
             $this->commands([
                 Commands\AboutLog::class,
+                Commands\ClearLog::class,
                 Commands\ShowLog::class,
                 Commands\SearchLog::class,
             ]);

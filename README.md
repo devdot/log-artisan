@@ -33,6 +33,12 @@ Search through logs using `log:search`, with search terms that can be regex:
 
 ![log-search](https://user-images.githubusercontent.com/3763567/223183949-92c79a55-0faa-4b88-9555-cea0fc5a468b.PNG)
 
+Clear all log files like this:
+
+```bash
+php artisan log:clear
+```
+
 ## Documentation
 
 ### About Command
@@ -78,3 +84,14 @@ php artisan log:search "(test|regex \w+)"
 ```
 
 Options are the same as with `log:show`.
+
+### Clear Command
+
+Clear a given logging channel. Use option `--all` to clear all configured channels.
+
+```bash
+php artisan log:clear single
+php artisan log:clear --all
+```
+
+This command will write a new log entry to each cleared file.
