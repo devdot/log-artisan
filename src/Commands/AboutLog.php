@@ -134,43 +134,4 @@ class AboutLog extends Command
 
         return Command::SUCCESS;
     }
-
-    public static function displaySection(Command $cmd, string $section, array $data) {
-        $cmd->newLine();
-        $cmd->components->twoColumnDetail('  <fg=green;options=bold>'.$section.'</>');
-        foreach($data as $key => $value) {
-            $cmd->components->twoColumnDetail($key, $value);
-        }
-    }
-
-    public static function styleDebugLevel($level) {
-        switch(strtolower($level)) {
-            // sorted in descending order of severity
-            case 'emergency':
-                $color = 'magenta';
-                break;
-            case 'alert':
-            case 'critical':
-                $color = 'bright-red';
-                break;
-            case 'error':
-                $color = 'red';
-                break;
-            case 'warning':
-            case 'notice':
-                $color = 'yellow';
-                break;
-            case 'info':
-                $color = 'blue';
-                break;
-            case 'debug':
-                $color = 'gray';
-                break;
-            default:
-                $color = 'white';
-                break;
-        }
-        $value = '<fg='.$color.'>'.strtoupper($level).'</>';
-        return $value;
-    }
 }
