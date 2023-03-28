@@ -22,18 +22,16 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider {
      */
     public function boot()
     {
-        AboutCommand::add('devdot/log-user', fn () => [
+        AboutCommand::add('devdot/log-artisan', fn () => [
             'available' => true,
         ]);
 
         // install all our commands
-        if($this->app->runningInConsole()) {
-            $this->commands([
-                Commands\AboutLog::class,
-                Commands\ClearLog::class,
-                Commands\ShowLog::class,
-                Commands\SearchLog::class,
-            ]);
-        }
+        $this->commands([
+            Commands\AboutLog::class,
+            Commands\ClearLog::class,
+            Commands\ShowLog::class,
+            Commands\SearchLog::class,
+        ]);
     }
 }
