@@ -3,6 +3,7 @@
 namespace Devdot\LogArtisan\Commands;
 
 use Devdot\LogArtisan\Models\LogRecord;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 
 class SearchLog extends ShowLog {
@@ -20,6 +21,8 @@ class SearchLog extends ShowLog {
         $this->filter['search'] = $this->argument('search');
         $this->line('Running search via log:show for <bg=yellow>'.$this->filter['search'].'</>');
         parent::handle();
+
+        return Command::SUCCESS;
     }
 
     protected function addHighlightingToRecord(LogRecord $record): LogRecord {
