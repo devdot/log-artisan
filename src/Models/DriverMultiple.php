@@ -66,6 +66,9 @@ class DriverMultiple extends Driver {
         return $this->logs;
     }
 
+    /**
+     * @param array{count?: int, level?: string, search?: string} $filter Filter array as provided by ShowLog
+     */
     protected function accumulateRecords(array $filter = []): void {
         $this->records = [];
         foreach($this->drivers as $driver) {

@@ -9,6 +9,13 @@ use Symfony\Component\Console\Input\InputArgument;
 class SearchLog extends ShowLog {
     protected $description = 'Search through all log entries';
 
+    /**
+     * @var array{count?: int, level?: string, search: string} Search is always set on SearchLog
+     */
+    protected array $filter = [
+        'search' => '',
+    ];
+
     public function __construct() {
         // basically, we use the parent class and add an arugment
         parent::__construct();

@@ -47,12 +47,9 @@ class ShowLog extends Command
     protected int $terminalWidth;
 
     /**
-     * @var array<string, int|string|null>
+     * @var array{count?: int, level?: string, search?: string}
      */
-    protected array $filter = [
-        'count' => null,
-        'level' => null,
-    ];
+    protected array $filter = [];
 
     /**
      * Execute the console command.
@@ -102,7 +99,7 @@ class ShowLog extends Command
         $multidriver = new DriverMultiple('', $channels);
         
         // info line at top
-        $this->line('Showing <fg=gray>'.$this->filter['count'].'</> entries from log channel <fg=gray>'.implode(', ', $channels).'</>'.($this->filter['level'] ? ' at level <fg=gray>'.$this->filter['level'].'</fg=gray>' : ''));
+        $this->line('Showing <fg=gray>'.$this->filter['count'].'</> entries from log channel <fg=gray>'.implode(', ', $channels).'</>'.(isset($this->filter['level']) ? ' at level <fg=gray>'.$this->filter['level'].'</fg=gray>' : ''));
 
         // check if we have files at all
         if(count($multidriver->getFilenames()) === 0) {

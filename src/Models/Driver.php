@@ -50,7 +50,7 @@ class Driver {
     }
 
     /**
-     * @param array<string, int|string>  $filter
+     * @param array{count?: int, level?: string, search?: string} $filter Filter array as provided by ShowLog
      * @return array<LogRecord>
      */
     public function getRecords(array $filter = []): array {
@@ -63,7 +63,7 @@ class Driver {
     }
 
     /**
-     * @param array<string, int|string>  $filter
+     * @param array{count?: int, level?: string, search?: string} $filter Filter array as provided by ShowLog
      * @return array<LogRecord>
      */
     protected function getFilteredRecords(array $filter): array {
