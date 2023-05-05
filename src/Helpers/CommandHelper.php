@@ -9,6 +9,7 @@ use Illuminate\Console\Command;
 class CommandHelper extends Command { 
     /**
      * Print a section component
+     * @param array<string> $data
      */
     public static function displaySection(Command $cmd, string $section, array $data): void {
         $cmd->newLine();

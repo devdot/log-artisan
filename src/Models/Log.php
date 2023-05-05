@@ -20,7 +20,7 @@ class Log {
         }
     }
 
-    public function setFile(string $filename) {
+    public function setFile(string $filename): bool {
         // set in object
         $this->filename = $filename;
         // now attempt to set in parser
@@ -33,11 +33,14 @@ class Log {
         return true;
     }
 
-    public function getFilename() {
+    public function getFilename(): string {
         return $this->filename;
     }
 
-    public function getRecords() {
+    /**
+     * @return array<int, \Devdot\Monolog\LogRecord>
+     */
+    public function getRecords(): array {
         // simply access the parser
         return $this->parser->get();
     }

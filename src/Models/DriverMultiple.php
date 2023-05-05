@@ -7,15 +7,24 @@ use Devdot\LogArtisan\Models\Drivers\Single;
 use Devdot\LogArtisan\Models\Drivers\Stack;
 
 class DriverMultiple extends Driver {
+    /**
+     * @var array<int, Driver> 
+     */
     protected array $drivers;
 
+    /**
+     * @param array<int, string> $channels
+     */
     public function __construct(string $channel, array $channels = []) {
         $this->channel = $channel;
         $this->createDrivers($channels);
         parent::__construct($channel);
     }
 
-    protected function createDrivers(array $channels) {
+    /**
+     * @param array<int, string> $channels
+     */
+    protected function createDrivers(array $channels): void {
         foreach($channels as $channel) {
             // create a new driver for each subchannel
             $driver = config('logging.channels.'.$channel.'.driver');
@@ -57,13 +66,12 @@ class DriverMultiple extends Driver {
         return $this->logs;
     }
 
-    protected function accumulateRecords(array $filter = []) {
+    protected function accumulateRecords(array $filter = []): void {
         $this->records = [];
         foreach($this->drivers as $driver) {
             $this->records = array_merge($this->records, $driver->getRecords($filter));
         }
         // make sure to sort after merging
         $this->sortRecords();
-        return $this->records;
     }
 }

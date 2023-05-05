@@ -4,8 +4,17 @@ namespace Devdot\LogArtisan\Models;
 
 class Driver {
     protected string $channel;
+    /**
+     * @var array<int, string>
+     */
     protected array $filenames = [];
+    /**
+     * @var array<int, Log>
+     */
     protected array $logs = [];
+    /**
+     * @var array<int, LogRecord>
+     */
     protected array $records;
 
     public function __construct(string $channel) {
@@ -14,11 +23,11 @@ class Driver {
         $this->createLogs();
     }
 
-    protected function generateFilenames() {
+    protected function generateFilenames(): void {
         $this->filenames = [];
     }
 
-    protected function createLogs() {
+    protected function createLogs(): void {
         $this->logs = array_map(fn($filename) => new Log($filename), $this->filenames);
     }
 
@@ -26,14 +35,24 @@ class Driver {
         return $this->channel;
     }
 
+    /**
+     * @return array<string>
+     */
     public function getFilenames(): array {
         return $this->filenames;
     }
 
+    /**
+     * @return array<Log>
+     */
     public function getLogs(): array {
         return $this->logs;
     }
 
+    /**
+     * @param array<string, int|string>  $filter
+     * @return array<LogRecord>
+     */
     public function getRecords(array $filter = []): array {
         // check if we have generated it before
         if(!isset($this->records) || empty($this->records)) {
@@ -43,7 +62,11 @@ class Driver {
         return $this->getFilteredRecords($filter);
     }
 
-    public function getFilteredRecords(array $filter): array {
+    /**
+     * @param array<string, int|string>  $filter
+     * @return array<LogRecord>
+     */
+    protected function getFilteredRecords(array $filter): array {
         $records = $this->records;
         if(isset($filter['level'])) {
             // filter all that have this level
@@ -55,12 +78,15 @@ class Driver {
         }
         if(isset($filter['count']) && count($records) > $filter['count']) {
             // only return the last $count
-            $records = array_slice($records, -$filter['count']);
+            $records = array_slice($records, -((int)$filter['count']));
         }
         return $records;
     }
 
-    protected function accumulateRecords(array $filter = []) {
+    /**
+     * @param array<string, int|string>  $filter
+     */
+    protected function accumulateRecords(array $filter = []): void {
         $this->records = [];
         foreach($this->logs as $log) {
             // get all the records from this logfile and merge them into the others
@@ -85,7 +111,7 @@ class Driver {
         $this->sortRecords();
     }
 
-    protected function sortRecords() {
-        usort($this->records, fn($a, $b) => ($a['datetime']->format('U') > $b['datetime']->format('U')));
+    protected function sortRecords(): void {
+        usort($this->records, fn($a, $b): int => (int) ($a['datetime']->format('U') > $b['datetime']->format('U')));
     }
 }

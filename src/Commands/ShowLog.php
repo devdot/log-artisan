@@ -46,6 +46,9 @@ class ShowLog extends Command
 
     protected int $terminalWidth;
 
+    /**
+     * @var array<string, int|string|null>
+     */
     protected array $filter = [
         'count' => null,
         'level' => null,
@@ -146,7 +149,7 @@ class ShowLog extends Command
         return Command::SUCCESS;
     }
 
-    protected function printSeparator() {
+    protected function printSeparator(): void {
         $this->newLine();
         $this->line('<bg=gray>'.str_pad('', $this->terminalWidth, ' ').'</>');
         $this->newLine();

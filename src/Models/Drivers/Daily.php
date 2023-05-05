@@ -5,7 +5,7 @@ namespace Devdot\LogArtisan\Models\Drivers;
 use Devdot\LogArtisan\Models\Driver;
 
 class Daily extends Driver {
-    protected function generateFilenames() {
+    protected function generateFilenames(): void {
         // get the config data
         $filename = config('logging.channels.'.$this->channel.'.path');
         $days = config('logging.channels.'.$this->channel.'.days');
