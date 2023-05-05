@@ -27,7 +27,7 @@ class Log {
         try {
             $this->parser->setFile($filename);
         }
-        catch(\Devdot\Monolog\Parser\Exceptions\FileNotFoundException $e) {
+        catch(\Devdot\Monolog\Exceptions\FileNotFoundException $e) {
             return false;
         }
         return true;
