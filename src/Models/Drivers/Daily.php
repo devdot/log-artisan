@@ -14,7 +14,7 @@ class Daily extends Driver {
         for($day = 0; $day <= $days; $day++) {
             // build filename
             $time = strtotime('today -'.$day.' days');
-            $dayFilename = substr($filename, 0, -4).'-'.date('Y-m-d', $time).'.log';
+            $dayFilename = substr($filename, 0, -4).'-'.date('Y-m-d', (int) $time).'.log';
             // and check if it exists
             if(file_exists($dayFilename)) {
                 $this->filenames[] = $dayFilename;

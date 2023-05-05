@@ -108,7 +108,7 @@ class AboutLog extends Command
                     case 'path':
                         // now check if this file exists and when it was modified
                         if(file_exists($value)) {
-                            $value = '<fg=gray><'.date('Y-m-d H:i:s', filemtime($value)).'></> '.$value;
+                            $value = '<fg=gray><'.date('Y-m-d H:i:s', (int) filemtime($value)).'></> '.$value;
                         }
                         else {
                             $value = '<fg=gray><file missing></> <fg=red>'.$value.'</>';
