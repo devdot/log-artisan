@@ -70,7 +70,8 @@ class ShowLog extends Command
         
         // level
         if(!empty($this->option('level'))) {
-            $this->filter['level'] = $this->option('level');
+            $level = $this->option('level');
+            $this->filter['level'] = (string) (is_array($level) ? $level[0] : $level);
             if(!in_array($this->filter['level'], self::LEVELS)) {
                 // this is an invalid log level
                 $this->error('Log Level is invalid, try: '.implode(', ', self::LEVELS));
@@ -81,7 +82,8 @@ class ShowLog extends Command
         // channel filtering
         $channels = [];
         if(!empty($this->option('channel'))) {
-            $channels[] = $this->option('channel');
+            $channel = $this->option('channel');
+            $channels[] = (string) (is_array($channel) ? $channel[0] : $channel);
             // check if this channel is configured
             if(empty(config('logging.channels.'.$channels[0]))) {
                 $this->error('Channel is not configured!');

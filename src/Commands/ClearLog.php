@@ -41,7 +41,8 @@ class ClearLog extends Command
         // now create the channel driver objects safely
         $channels = [];
         if($this->argument('channel')) {
-            $channels[] = $this->argument('channel');
+            $channel = $this->argument('channel');
+            $channels[] = (string) (is_array($channel) ? $channel[0] : $channel);
             // check if this channel is configured
             if(empty(config('logging.channels.'.$channels[0]))) {
                 $this->error('Channel is not configured!');

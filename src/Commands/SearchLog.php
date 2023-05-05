@@ -18,7 +18,8 @@ class SearchLog extends ShowLog {
 
     public function handle() {
         // basically, we add the search term to the filter and then we let the parent function handle it normally
-        $this->filter['search'] = $this->argument('search');
+        $search = $this->argument('search');
+        $this->filter['search'] = (string) (is_array($search) ? $search[0] : $search);
         $this->line('Running search via log:show for <bg=yellow>'.$this->filter['search'].'</>');
         parent::handle();
 
