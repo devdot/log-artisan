@@ -37,10 +37,7 @@ class Log {
         return $this->filename;
     }
 
-    /**
-     * @return array<int, \Devdot\Monolog\LogRecord>
-     */
-    public function getRecords(): array {
+    public function getRecords(): \Devdot\Monolog\Log {
         // simply access the parser
         return $this->parser->get();
     }
