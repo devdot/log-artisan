@@ -215,7 +215,7 @@ class ShowLog extends Command
         $plain = preg_replace('/<[^\/]*?>(.*?)<\/>/', '$1', $str);
 
         // and shorten the entire string to fit one line
-        if(strlen($plain) > $this->terminalWidth) {
+        if(strlen($plain ?? '') > $this->terminalWidth) {
             // split the text open according to preg match
             $m = [];
             preg_match_all('/(<(?<tag>[^\/]*?)>(?<string>.*?)<\/>|.*?)/', $str, $m, PREG_SET_ORDER);

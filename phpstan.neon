@@ -3,6 +3,8 @@ parameters:
     paths:
         - src/
 
+    level: 8
+
     ignoreErrors:
         -
             message: '#Function config not found#'
