@@ -24,8 +24,8 @@
     "require": {
         "php": "^8.0",
         "devdot/monolog-parser": "^1.4",
-        "illuminate/contracts": "^9",
-        "illuminate/console": "^9"
+        "illuminate/contracts": "^9|^10",
+        "illuminate/console": "^9|^10"
     },
     "extra": {
         "laravel": {
