@@ -31,25 +31,25 @@ class ClearLog extends Command
      * @return int
      */
     public function handle()
-    {   
+    {
         // make sure the all flag is set when no channel is provided
-        if(empty($this->argument('channel')) && $this->option('all') === false) {
+        if (empty($this->argument('channel')) && $this->option('all') === false) {
             $this->error('No channel name provided. If you wish to clear all logs, set the --all option explicitly.');
             return Command::INVALID;
         }
 
         // now create the channel driver objects safely
         $channels = [];
-        if($this->argument('channel')) {
+        if ($this->argument('channel')) {
             $channel = $this->argument('channel');
             $channels[] = (string) (is_array($channel) ? $channel[0] : $channel);
             // check if this channel is configured
-            if(empty(config('logging.channels.'.$channels[0]))) {
+            if (empty(config('logging.channels.' . $channels[0]))) {
                 $this->error('Channel is not configured!');
                 return Command::INVALID;
             }
         }
-        if($this->option('all')) {
+        if ($this->option('all')) {
             $channels = [
                 config('logging.default'),
                 config('logging.deprecations.channel'),
@@ -66,13 +66,13 @@ class ClearLog extends Command
         // and load the files through the driver
         $files = $multidriver->getFilenames();
 
-        $this->line('Found '.count($files).' log files');
+        $this->line('Found ' . count($files) . ' log files');
 
         // loop through the files and clear them
-        foreach($files as $file) {
+        foreach ($files as $file) {
             $this->line($file);
             // clear the file
-            if(unlink($file) == false) {
+            if (unlink($file) == false) {
                 $this->error('Failed unlinking file!');
                 continue;
             }

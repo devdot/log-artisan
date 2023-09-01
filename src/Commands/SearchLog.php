@@ -6,7 +6,8 @@ use Devdot\LogArtisan\Models\LogRecord;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 
-class SearchLog extends ShowLog {
+class SearchLog extends ShowLog
+{
     protected $description = 'Search through all log entries';
 
     /**
@@ -16,34 +17,38 @@ class SearchLog extends ShowLog {
         'search' => '',
     ];
 
-    public function __construct() {
+    public function __construct()
+    {
         // basically, we use the parent class and add an arugment
         parent::__construct();
         $this->addArgument('search', InputArgument::REQUIRED, 'Search term to be searched for in the logs.');
         $this->setName('log:search');
     }
 
-    public function handle() {
+    public function handle()
+    {
         // basically, we add the search term to the filter and then we let the parent function handle it normally
         $search = $this->argument('search');
         $this->filter['search'] = (string) (is_array($search) ? $search[0] : $search);
-        $this->line('Running search via log:show for <bg=yellow>'.$this->filter['search'].'</>');
+        $this->line('Running search via log:show for <bg=yellow>' . $this->filter['search'] . '</>');
         parent::handle();
 
         return Command::SUCCESS;
     }
 
-    protected function addHighlightingToRecord(LogRecord $record): LogRecord {
+    protected function addHighlightingToRecord(LogRecord $record): LogRecord
+    {
         $message = preg_replace(
             [
-                '/('.$this->filter['search'].')/i', 
-                '/\\\\<bg=yellow>('.$this->filter['search'].')<\/>/i', // the sequence \<bg=yellow> causes errors, even when everything is escaped like \\<...> (maybe a Symfony bug?)
+                '/(' . $this->filter['search'] . ')/i',
+                '/\\\\<bg=yellow>(' . $this->filter['search'] . ')<\/>/i', // the sequence \<bg=yellow> causes errors, even when everything is escaped like \\<...> (maybe a Symfony bug?)
             ],
             [
                 '<bg=yellow>$1</>',
                 '<bg=yellow>\\\\$1</>', // solution to the issue above: include the backslash in the highlighting
             ],
-            $record['message']);
+            $record['message']
+        );
         $driver = $record->getDriver();
         $record = new LogRecord(
             $record['datetime'],
@@ -57,13 +62,15 @@ class SearchLog extends ShowLog {
         return $record;
     }
 
-    protected function printRecord(LogRecord $record): void {
+    protected function printRecord(LogRecord $record): void
+    {
         // simply add highlighting and then let the parent handle it
         $record = $this->addHighlightingToRecord($record);
         parent::printRecord($record);
     }
 
-    protected function printRecordSingleline(LogRecord $record): void {
+    protected function printRecordSingleline(LogRecord $record): void
+    {
         // same as print Record
         // simply add highlighting and then let the parent handle it
         $record = $this->addHighlightingToRecord($record);

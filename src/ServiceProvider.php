@@ -4,7 +4,8 @@ namespace Devdot\LogArtisan;
 
 use Illuminate\Foundation\Console\AboutCommand;
 
-class ServiceProvider extends \Illuminate\Support\ServiceProvider {
+class ServiceProvider extends \Illuminate\Support\ServiceProvider
+{
     /**
      * Register services.
      *
@@ -12,7 +13,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider {
      */
     public function register()
     {
-        // 
+        //
     }
 
     /**

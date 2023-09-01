@@ -32,13 +32,13 @@ class AboutLog extends Command
      * @return int
      */
     public function handle()
-    {   
-        // gather all channels as they are used     
+    {
+        // gather all channels as they are used
         $mainChannels = [
-            'Default Channel' => config('logging.default'), 
+            'Default Channel' => config('logging.default'),
             'Deprecations Channel' => config('logging.deprecations.channel'),
         ];
-       
+
         // now parse the main channels for their used channels
         $channels = [];
 
@@ -48,24 +48,24 @@ class AboutLog extends Command
             ['level' => 'emergency'],
         );
 
-        foreach($mainChannels as $key => $channel) {
-            if($channel == null) {
+        foreach ($mainChannels as $key => $channel) {
+            if ($channel == null) {
                 // overwrite with null string
                 $mainChannels[$key] = self::STR_NULL;
                 continue;
             }
 
-            $channels[$channel] = config('logging.channels.'.$channel);
+            $channels[$channel] = config('logging.channels.' . $channel);
 
             // check if this channel has sub-channels
-            if(count(config('logging.channels.'.$channel.'.channels', []))) {
-                $subchannels = config('logging.channels.'.$channel.'.channels');
-                foreach($subchannels as $sub) {
-                    $channels[$sub] = config('logging.channels.'.$sub);
+            if (count(config('logging.channels.' . $channel . '.channels', []))) {
+                $subchannels = config('logging.channels.' . $channel . '.channels');
+                foreach ($subchannels as $sub) {
+                    $channels[$sub] = config('logging.channels.' . $sub);
                 }
 
                 // update the channel string for this main channel
-                $mainChannels[$key] = $channel.': '.implode(', ', $subchannels);
+                $mainChannels[$key] = $channel . ': ' . implode(', ', $subchannels);
             }
         }
 
@@ -77,7 +77,7 @@ class AboutLog extends Command
         CommandHelper::displaySection($this, 'Logging Configuration', array_merge($config, $mainChannels));
 
         // get data from channels
-        foreach($channels as $channel => $config) {
+        foreach ($channels as $channel => $config) {
             // make sure each channel has driver and level
 
             // custom sort the config: first driver, level, path, rest alphabetical
@@ -85,19 +85,21 @@ class AboutLog extends Command
                 'driver' => $config['driver'] ?? null,
                 'level' => $config['level'] ?? null,
             ];
-            if(isset($config['path'])) $arr['path'] = $config['path'];
+            if (isset($config['path'])) {
+                $arr['path'] = $config['path'];
+            }
             ksort($config);
             $config = array_merge($arr, $config);
 
             $display = [];
             // now sift through the config
-            foreach($config as $key => $value) {
+            foreach ($config as $key => $value) {
                 // make arrays into strings
-                if(is_array($value)) {
+                if (is_array($value)) {
                     $value = implode(', ', $value);
                 }
 
-                switch($key) {
+                switch ($key) {
                     // filter away what shouldnt be shown
                     case 'username':
                     case 'password':
@@ -107,11 +109,10 @@ class AboutLog extends Command
                         break;
                     case 'path':
                         // now check if this file exists and when it was modified
-                        if(file_exists($value)) {
-                            $value = '<fg=gray><'.date('Y-m-d H:i:s', (int) filemtime($value)).'></> '.$value;
-                        }
-                        else {
-                            $value = '<fg=gray><file missing></> <fg=red>'.$value.'</>';
+                        if (file_exists($value)) {
+                            $value = '<fg=gray><' . date('Y-m-d H:i:s', (int) filemtime($value)) . '></> ' . $value;
+                        } else {
+                            $value = '<fg=gray><file missing></> <fg=red>' . $value . '</>';
                         }
                         break;
                     case 'level':
@@ -120,16 +121,16 @@ class AboutLog extends Command
                         break;
                 }
 
-                if(is_bool($value)) {
+                if (is_bool($value)) {
                     $value = $value ? self::STR_TRUE : self::STR_FALSE;
                 }
 
                 $display[$key] = $value ?? self::STR_NULL;
             }
 
-            CommandHelper::displaySection($this, 'Channel: '.$channel, $display);
+            CommandHelper::displaySection($this, 'Channel: ' . $channel, $display);
         }
-        
+
         $this->newLine();
 
         return Command::SUCCESS;

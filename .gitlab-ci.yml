@@ -1,0 +1,23 @@
+
+# required for this CI Pipeline:
+#   - squizlabs/php_codesniffer
+#   - phpstan.neon file
+# recommended: captainhook/captainhook
+        
+
+default:
+  image: serversideup/php:8.1-cli
+
+stages:
+  - test
+
+cache:
+  paths:
+   - vendor/
+
+test_quality:
+  script:
+    - composer install
+    - vendor/bin/phpcs --standard=PSR12 -n src
+    # - vendor/bin/phpcs --standard=PSR12 -n tests --exclude=PSR1.Methods.CamelCapsMethodName
+    - vendor/bin/phpstan analyse

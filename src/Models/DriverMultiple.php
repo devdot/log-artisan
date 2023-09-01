@@ -6,16 +6,18 @@ use Devdot\LogArtisan\Models\Drivers\Daily;
 use Devdot\LogArtisan\Models\Drivers\Single;
 use Devdot\LogArtisan\Models\Drivers\Stack;
 
-class DriverMultiple extends Driver {
+class DriverMultiple extends Driver
+{
     /**
-     * @var array<int, Driver> 
+     * @var array<int, Driver>
      */
     protected array $drivers;
 
     /**
      * @param array<int, string> $channels
      */
-    public function __construct(string $channel, array $channels = []) {
+    public function __construct(string $channel, array $channels = [])
+    {
         $this->channel = $channel;
         $this->createDrivers($channels);
         parent::__construct($channel);
@@ -24,11 +26,12 @@ class DriverMultiple extends Driver {
     /**
      * @param array<int, string> $channels
      */
-    protected function createDrivers(array $channels): void {
-        foreach($channels as $channel) {
+    protected function createDrivers(array $channels): void
+    {
+        foreach ($channels as $channel) {
             // create a new driver for each subchannel
-            $driver = config('logging.channels.'.$channel.'.driver');
-            switch($driver) {
+            $driver = config('logging.channels.' . $channel . '.driver');
+            switch ($driver) {
                 case 'single':
                     $this->drivers[] = new Single($channel);
                     break;
@@ -40,7 +43,7 @@ class DriverMultiple extends Driver {
                     break;
                 case null:
                     // special case for emergency channel
-                    if($channel == 'emergency') {
+                    if ($channel == 'emergency') {
                         $this->drivers[] = new Single($channel);
                     }
                     break;
@@ -50,17 +53,19 @@ class DriverMultiple extends Driver {
         }
     }
 
-    public function getFilenames(): array {
+    public function getFilenames(): array
+    {
         $this->filenames = [];
-        foreach($this->drivers as $driver) {
+        foreach ($this->drivers as $driver) {
             $this->filenames = array_merge($this->filenames, $driver->getFilenames());
         }
         return $this->filenames;
     }
 
-    public function getLogs(): array {
+    public function getLogs(): array
+    {
         $this->logs = [];
-        foreach($this->drivers as $driver) {
+        foreach ($this->drivers as $driver) {
             $this->logs = array_merge($this->logs, $driver->getLogs());
         }
         return $this->logs;
@@ -69,9 +74,10 @@ class DriverMultiple extends Driver {
     /**
      * @param array{count?: int, level?: string, search?: string} $filter Filter array as provided by ShowLog
      */
-    protected function accumulateRecords(array $filter = []): void {
+    protected function accumulateRecords(array $filter = []): void
+    {
         $this->records = [];
-        foreach($this->drivers as $driver) {
+        foreach ($this->drivers as $driver) {
             $this->records = array_merge($this->records, $driver->getRecords($filter));
         }
         // make sure to sort after merging
