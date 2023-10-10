@@ -123,6 +123,6 @@ class Driver
 
     protected function sortRecords(): void
     {
-        usort($this->records, fn($a, $b): int => (int) ($a['datetime']->format('U') > $b['datetime']->format('U')));
+        usort($this->records, fn(LogRecord $a, LogRecord $b): int => $a['datetime']->format('U') - $b['datetime']->format('U'));
     }
 }
