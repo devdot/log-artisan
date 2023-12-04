@@ -8,7 +8,7 @@
         ]
     },
     "pre-push": {
-        "enabled": false,
+        "enabled": true,
         "actions": [
             {
                 "action": "composer check-static"
