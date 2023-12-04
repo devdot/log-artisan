@@ -20,4 +20,4 @@ test_quality:
     - composer install
     - vendor/bin/phpcs --standard=PSR12 -n src
     # - vendor/bin/phpcs --standard=PSR12 -n tests --exclude=PSR1.Methods.CamelCapsMethodName
-    - vendor/bin/phpstan analyse
+    - composer check-static
