@@ -28,7 +28,7 @@
     ],
     "require": {
         "php": "^8.2",
-        "devdot/monolog-parser": "^1.5",
+        "devdot/monolog-parser": "^1.6",
         "illuminate/contracts": "^11",
         "illuminate/console": "^11"
     },
