@@ -31,9 +31,7 @@ class SearchLog extends ShowLog
         $search = $this->argument('search');
         $this->filter['search'] = (string) (is_array($search) ? $search[0] : $search);
         $this->line('Running search via log:show for <bg=yellow>' . $this->filter['search'] . '</>');
-        parent::handle();
-
-        return Command::SUCCESS;
+        return parent::handle();
     }
 
     protected function addHighlightingToRecord(LogRecord $record): LogRecord
