@@ -43,13 +43,15 @@ class AboutLog extends Command
         $channels = [];
 
         // add the emergency channel
-        $channels['emergency (internal)'] = array_merge(
-            config('logging.channels.emergency'),
-            ['level' => 'emergency'],
-        );
+        if (config('logging.channels.emergency')) {
+            $channels['emergency (internal)'] = array_merge(
+                config('logging.channels.emergency'),
+                ['level' => 'emergency'],
+            );
+        }
 
         foreach ($mainChannels as $key => $channel) {
-            if ($channel == null) {
+            if ($channel === null or $channel === 'null') {
                 // overwrite with null string
                 $mainChannels[$key] = self::STR_NULL;
                 continue;
