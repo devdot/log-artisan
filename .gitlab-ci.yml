@@ -6,7 +6,7 @@
         
 
 default:
-  image: serversideup/php:8.1-cli
+  image: thomasschaller/php-cli:8.2
 
 stages:
   - test
@@ -15,9 +15,14 @@ cache:
   paths:
    - vendor/
 
+test_phpunit:
+  stage: test
+  script:
+    - composer install
+    - composer test
+
 test_quality:
   script:
     - composer install
     - vendor/bin/phpcs --standard=PSR12 -n src
-    # - vendor/bin/phpcs --standard=PSR12 -n tests --exclude=PSR1.Methods.CamelCapsMethodName
     - composer check-static

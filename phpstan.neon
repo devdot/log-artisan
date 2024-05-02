@@ -7,13 +7,5 @@ parameters:
 
     ignoreErrors:
         -
-            message: '#Function config not found#'
-        -
             message: '#Call to an undefined method Illuminate\\Contracts\\Foundation\\Application::configurationIsCached\(\)#'
             path: src/Commands/AboutLog.php
-        -
-            message: '#Call to static method add\(\) on an unknown class Illuminate\\Foundation\\Console\\AboutCommand#'
-            path: src/ServiceProvider.php
-        -
-            message: '#Call to method info\(\) on an unknown class Psr\\Log\\LoggerInterface.#'
-            path: src/Commands/ClearLog.php
