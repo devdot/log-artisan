@@ -2,7 +2,9 @@
 
 namespace Devdot\LogArtisan\Models;
 
-class LogRecord extends \Devdot\Monolog\LogRecord
+use Devdot\Monolog\LogRecord as BaseLogRecord;
+
+readonly class LogRecord extends BaseLogRecord
 {
     private Driver $driver;
 
