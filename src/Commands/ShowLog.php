@@ -229,7 +229,7 @@ class ShowLog extends Command
                 // if we found a tag, handle that
                 if (isset($match['tag'])) {
                     // create substring that is not longer than the remaining length
-                    $sub = substr($match['string'], 0, $remaining);
+                    $sub = substr($match['string'] ?? '', 0, $remaining);
                     // rebuild the tag
                     $str .= '<' . $match['tag'] . '>' . $sub . '</>';
                 } else {
